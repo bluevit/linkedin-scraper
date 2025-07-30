@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from linkedin_jobs_scraper import LinkedinScraper
 from linkedin_jobs_scraper.events import Events, EventData
+from linkedin_jobs_scraper.query import Query, QueryOptions
 
 app = Flask(__name__)
 
@@ -28,16 +29,18 @@ def scrape():
 
     scraper = LinkedinScraper(headless=True, max_workers=1)
     scraper.on(Events.DATA, on_data)
-    scraper.run([{
-        "query": keyword,
-        "options": {
-            "locations": [location],
-            "limit": 5
-        }
-    }])
+
+    query = Query(
+        query=keyword,
+        options=QueryOptions(
+            locations=[location],
+            limit=5
+        )
+    )
+
+    scraper.run([query])
 
     return jsonify(result)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
